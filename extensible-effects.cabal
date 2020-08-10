@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9b4bb7744205c7e0a7eb8440d6a37582390583a47014f3bb6d45460f452bb518
+-- hash: 41cd27e1d7be9cf11a8585062a7518ec9320f7b098272a7c04e895e550f4de89
 
 name:           extensible-effects
 version:        0.1.0.0
@@ -27,7 +27,6 @@ source-repository head
 
 library
   exposed-modules:
-      Eff
       Lib
   other-modules:
       Paths_extensible_effects
