@@ -42,3 +42,8 @@ send f = Eff $ \k -> E (f k)
 
 admin :: Eff r w -> VE w r
 admin (Eff m) = m Val
+
+data Void v -- no constructors
+
+run :: Eff Void w -> w
+run m = case admin m of Val x -> x
