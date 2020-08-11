@@ -17,6 +17,7 @@ module Lib
   )
 where
 import Control.Monad
+import Control.Applicative
 import Data.Functor
 
 data VE w = Val w | E (Int -> VE w)
@@ -26,13 +27,21 @@ newtype Eff a = Eff
   }
 
 instance Functor Eff where
+  -- (a -> b) -> f a -> f b
   fmap f (Eff c) = Eff $ \k -> c (\a -> k (f a))
 
-{-
+instance Applicative Eff where
+  pure x = Eff $ \k -> k x
+  (Eff a) <*> (Eff b) = Eff $ \k -> (a (\ab -> (b (\c -> k (ab c)))))
+
+  {-
+  do f <- fs
+   a <- as
+   pure (f a)
+  -}
 instance Monad Eff where
-  return x = Eff $ \k -> k x
+  return = pure
   m >>= f = Eff $ \k -> runEff m (\v -> runEff (f v) k)
--}
 
 ask :: Eff Int
 ask = Eff (\k -> E k)
