@@ -16,8 +16,9 @@ module Lib
   ( someFunc,
   )
 where
-import Control.Monad
+
 import Control.Applicative
+import Control.Monad
 import Data.Functor
 
 data VE w = Val w | E (Int -> VE w)
@@ -34,11 +35,6 @@ instance Applicative Eff where
   pure x = Eff $ \k -> k x
   (Eff a) <*> (Eff b) = Eff $ \k -> (a (\ab -> (b (\c -> k (ab c)))))
 
-  {-
-  do f <- fs
-   a <- as
-   pure (f a)
-  -}
 instance Monad Eff where
   return = pure
   m >>= f = Eff $ \k -> runEff m (\v -> runEff (f v) k)
@@ -55,6 +51,14 @@ runReader m e = loop (admin m)
     loop :: VE w -> w
     loop (Val x) = x
     loop (E k) = loop (k e)
+
+local :: (Int -> Int) -> Eff w -> Eff w
+local f m = do
+  e0 <- ask
+  let e = f e0
+  let loop (Val x) = return x
+      loop (E k) = loop (k e)
+  loop (admin m)
 
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
