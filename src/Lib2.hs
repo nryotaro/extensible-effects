@@ -1,18 +1,19 @@
 -- {-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE RankNTypes #-}
 
---
 -- {-# LANGUAGE MultiParamTypeClasses #-}
 -- {-# LANGUAGE TypeOperators #-}
 -- {-# LANGUAGE StandaloneDeriving #-}
 -- {-# LANGUAGE DeriveDataTypeable, GeneralizedNewtypeDeriving, DeriveFunctor #-}
 -- {-# LANGUAGE FlexibleContexts #-}
 -- {-# LANGUAGE ExistentialQuantification #-}
--- {-# LANGUAGE ScopedTypeVariables #-}
+
+{-# LANGUAGE ScopedTypeVariables #-}
+
 -- {-# LANGUAGE NoMonomorphismRestriction #-}
 -- {-# LANGUAGE AllowAmbiguousTypes #-}
 
-module Lib () where
+module Lib2() where
 
 import Control.Applicative
 import Control.Monad
@@ -47,3 +48,24 @@ data Void v -- no constructors
 
 run :: Eff Void w -> w
 run m = case admin m of Val x -> x
+
+ask :: Eff (Reader e) e
+ask = send Reader
+
+
+runReader :: forall e w. Eff (Reader e) w -> e -> Eff Void w
+runReader m e = loop (admin m) where
+  loop :: VE w (Reader e) -> Eff Void w
+  loop (Val x) = return x
+  -- requires ScopedTypeVariables
+  loop (E (Reader k)) = loop (k e) 
+
+
+add :: Monad m => m Int -> m Int -> m Int
+add = liftM2 (+)
+
+t1 :: Eff (Reader Int) Int
+t1 = ask `add` return (1:: Int)
+
+t1r :: Eff Void Int
+t1r = runReader t1 10
